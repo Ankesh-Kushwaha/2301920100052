@@ -1,4 +1,4 @@
-const axios = require("./axios");
+import axios from 'axios';
 
 const getToken = async () => {
     try {
@@ -16,4 +16,4 @@ const getToken = async () => {
     }
 };
 
-module.exports = getToken;
+export default getToken;

@@ -1,5 +1,5 @@
-const axios = require("./axios");
-const getToken = require("./auth");
+import axios from './axios';
+import getToken  from  './auth.js'
 
 const Log = async (stack, level, pkg, message) => {
     try {
@@ -26,4 +26,4 @@ const Log = async (stack, level, pkg, message) => {
     }
 };
 
-module.exports = Log;
+export default Log;
