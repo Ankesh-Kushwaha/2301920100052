@@ -1,152 +1,126 @@
-# Notification Service
+# Notification System Design
 
-A lightweight Express.js microservice that fetches notifications from the Evaluation API, calculates a priority score for each notification, and returns the **Top 10 highest-priority notifications**.
+## Overview
 
----
-
-## 🚀 Tech Stack
-
-- Express.js
-- ES Modules
-- Axios
-- Min Heap (Priority Queue)
+The Notification Service is a lightweight, stateless microservice that fetches notifications from the Evaluation API, calculates a priority score for each notification, and returns the **Top 10 highest-priority notifications**. No notification data is stored locally.
 
 ---
 
-## 📁 Project Structure
+## Architecture
 
 ```text
-notification-service/
-│
-├── config/
-│   ├── axios.js
-│   └── constants.js
-│
-├── controllers/
-│   └── notification.controller.js
-│
-├── middleware/
-│   ├── auth.middleware.js
-│   ├── error.middleware.js
-│   └── logger.middleware.js
-│
-├── routes/
-│   └── notification.routes.js
-│
-├── services/
-│   ├── notification.service.js
-│   └── priority.service.js
-│
-├── utils/
-│   ├── heap.js
-│   ├── priority.js
-│   └── response.js
-│
-├── app.js
-├── server.js
-├── package.json
-├── .env
-└── README.md
+                   Client
+                      │
+                      ▼
+            GET /api/notifications/:userId
+                      │
+                      ▼
+                 Express Router
+                      │
+                      ▼
+                  Controller
+                      │
+                      ▼
+             Notification Service
+                      │
+                      ▼
+         Evaluation Notification API
+                      │
+                      ▼
+          Priority Calculation Engine
+                      │
+                      ▼
+        Min Heap (Maintains Top 10)
+                      │
+                      ▼
+             JSON Response to Client
 ```
 
 ---
 
-## ⚙️ Working Flow
+## Project Flow
 
 ```text
-                 Client
-                    │
-                    ▼
-      GET /api/notifications/:userId
-                    │
-                    ▼
-               Express Router
-                    │
-                    ▼
-                Controller
-                    │
-                    ▼
-          Notification Service
-                    │
-                    ▼
-      Evaluation Notification API
-                    │
-                    ▼
-        Calculate Priority Score
-                    │
-                    ▼
-      Min Heap (Maintain Top 10)
-                    │
-                    ▼
-       Return Top 10 Notifications
+Request
+   │
+   ▼
+Fetch Notifications
+   │
+   ▼
+Calculate Priority Score
+   │
+   ▼
+Maintain Top 10 using Min Heap
+   │
+   ▼
+Sort by Priority
+   │
+   ▼
+Return Response
 ```
 
 ---
 
-## 🧮 Priority Calculation
+## Components
 
-Each notification is assigned a score based on:
+### Router
+- Receives API requests.
+- Forwards requests to the controller.
+
+### Controller
+- Handles request and response.
+- Calls the notification service.
+
+### Notification Service
+- Fetches notifications from the Evaluation API.
+- Sends notifications to the priority engine.
+
+### Priority Engine
+- Computes a priority score for each notification.
+- Uses a **Min Heap** to efficiently maintain the Top 10 notifications.
+
+---
+
+## Priority Factors
+
+Each notification's priority is calculated using:
 
 - Notification Type
 - Read Status
 - Favorite Status
-- Recency (newer notifications get higher priority)
-
-A **Min Heap** is used to efficiently maintain only the **Top 10** highest-priority notifications.
-
-**Time Complexity:** `O(N log 10) ≈ O(N)`
-
-**Space Complexity:** `O(10)`
+- Recency (newer notifications receive higher priority)
 
 ---
 
-## ▶️ Installation
+## Why Min Heap?
 
-```bash
-npm install
-```
+A Min Heap allows the service to efficiently maintain only the **Top 10** highest-priority notifications.
 
----
+- Insert Notification → **O(log 10)**
+- Maintain Top 10 → **O(N log 10) ≈ O(N)**
+- Space Complexity → **O(10)**
 
-## ▶️ Run
-
-```bash
-npm run dev
-```
+This approach avoids sorting the entire notification list and scales efficiently for large datasets.
 
 ---
 
-## 🔑 Environment Variables
+## Complexity Analysis
 
-```env
-PORT=5000
-BASE_URL=http://4.224.186.213/evaluation-service
-API_TOKEN=YOUR_API_TOKEN
-TOP_N=10
-```
+| Operation | Complexity |
+|-----------|------------|
+| Fetch Notifications | O(N) |
+| Priority Calculation | O(N) |
+| Heap Operations | O(N log 10) ≈ O(N) |
+| Final Sorting (Top 10) | O(10 log 10) |
+| Space | O(10) |
 
 ---
 
-## 📌 API Endpoint
+## Key Design Decisions
 
-### Get Top Notifications
-
-```http
-GET /api/notifications/:userId
-```
-
-### Response
-
-```json
-{
-  "success": true,
-  "count": 10,
-  "notifications": [
-    {
-      "id": 1,
-      "title": "Placement Drive",
-      "priority": 8
-    }
-  ]
-}
-```
+- Stateless microservice
+- Layered architecture
+- No database dependency
+- REST-based communication
+- Efficient Top-10 selection using a Min Heap
+- Modular and easily maintainable structure
