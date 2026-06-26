@@ -1,5 +1,7 @@
 import axios from './axios';
-import getToken  from  './auth.js'
+import getToken from './auth.js'
+import dotenv from 'dotenv';
+dotenv.config();
 
 const Log = async (stack, level, pkg, message) => {
     try {
